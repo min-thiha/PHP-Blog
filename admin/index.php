@@ -4,9 +4,31 @@
     header("location:login.php");
   }
   require_once "../config/config.php";
-  $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
-  if($statement->execute()){
+
+  if(!empty($_GET['pageno'])) {
+    $pageno = $_GET['pageno'];
+  } else {
+    $pageno = 1;
+  }
+  $numOfrecs = 1;
+  $offset = ($pageno - 1) * $numOfrecs;
+  if(empty($_POST['search'])) {
+    $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+    $statement->execute();
     $posts = $statement->fetchAll(PDO::FETCH_OBJ);
+    $total_pages = ceil(count($posts) / $numOfrecs);
+    $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC LIMIT $offset,$numOfrecs");
+    $statement->execute();
+    $results = $statement->fetchAll(PDO::FETCH_OBJ);
+  } else {
+    $search = $_POST['search'];
+    $statement = $pdo->prepare("SELECT * FROM posts WHERE title='$search' ORDER BY id DESC");
+    $statement->execute();
+    $posts = $statement->fetchAll(PDO::FETCH_OBJ);
+    $total_pages = ceil(count($posts) / $numOfrecs);
+    $statement = $pdo->prepare("SELECT * FROM posts WHERE title='$search' ORDER BY id DESC LIMIT $offset,$numOfrecs");
+    $statement->execute();
+    $results = $statement->fetchAll(PDO::FETCH_OBJ);
   }
 
 ?>
@@ -35,19 +57,19 @@
                     </tr>
                   </thead>
                   <tbody>
-                      <?php if($posts): ?>
-                        <?php $i = 1; foreach($posts as $post): ?>
+                      <?php if($results): ?>
+                        <?php $i = 1; foreach($results as $result): ?>
                           <tr>
                             <td><?php echo $i; ?></td>
-                            <td><?php echo $post->title; ?></td>
-                            <td><?php echo substr($post->content,0 , 50); ?></td>
+                            <td><?php echo $result->title; ?></td>
+                            <td><?php echo substr($result->content,0 , 50); ?></td>
                             <td>
                               <div class="btn-group">
                                   <div class="container">
-                                  <a href="edit.php?id=<?php echo $post->id; ?>" class="btn btn-outline-success">Edit</a>
+                                  <a href="edit.php?id=<?php echo $result->id; ?>" class="btn btn-outline-success">Edit</a>
                                   </div>
                                   <div class="container">
-                                  <a href="delete.php?id=<?php echo $post->id; ?>" class="btn btn-outline-danger">Delete</a>
+                                  <a href="delete.php?id=<?php echo $result->id; ?>" onclick="return confirm('Sure to delete ?');" class="btn btn-outline-danger">Delete</a>
                                   </div>
                               </div>
                             </td>
@@ -56,7 +78,20 @@
                       <?php endif; ?>  
 
                   </tbody>
-                </table>
+                </table> <br>
+                <nav aria-label="Page navigation example" class="float-right">
+                  <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="?pageno=1">First</a></li>
+                    <li class="page-item <?php if($pageno <= 1) {echo "disabled";} ?>">
+                      <a class="page-link" href="<?php if($pageno <= 1){echo '#';}else{echo "?pageno=".($pageno-1);} ?>">Previous</a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="#"><?php echo $pageno; ?></a></li>
+                    <li class="page-item <?php if($pageno >= $total_pages){echo 'disabled';} ?>">
+                      <a class="page-link" href="<?php if($pageno >= $total_pages){echo '#';}else{echo "?pageno=".($pageno+1);} ?>">Next</a>
+                    </li>
+                    <li class="page-item"><a class="page-link" href="?pageno=<?php echo $total_pages ?>">Last</a></li>
+                  </ul>
+                </nav>
               </div>
               <!-- /.card-body -->
             </div>

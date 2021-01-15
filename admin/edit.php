@@ -28,7 +28,7 @@
         $statement = $pdo->prepare("UPDATE posts SET title='$title',content='$content',image='$image' WHERE id='$id'");
         $result = $statement->execute();
         if($result){
-          echo "<script>alert('Successfully updated')</script>";
+          // echo "<script>alert('Successfully updated')</script>";
           header("location:index.php");
         }
       }
@@ -36,7 +36,7 @@
       $statement = $pdo->prepare("UPDATE posts SET title='$title',content='$content' WHERE id='$id'");
       $result = $statement->execute();
       if($result){
-        echo "<script>alert('Successfully updated')</script>";
+        // echo "<script>alert('Successfully updated')</script>";
         header("location:index.php");
       }
     }
@@ -54,7 +54,7 @@
             <div class="card">
                 <div class="card-body">
                     <form action="" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="id" value="<?php $post->id; ?>">
+                        <input type="hidden" name="id" value="<?php echo $post->id; ?>">
                         <div class="form-group">
                             <label for="">Title</label>
                             <input type="text" name="title" value="<?php echo $post->title; ?>" class="form-control" required>
