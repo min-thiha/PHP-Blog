@@ -1,3 +1,39 @@
+<?php
+  session_start();
+  require_once "config/config.php";
+  if(empty($_SESSION['user_id']) && empty($_SESSION['logged_in'])) {
+    header("location:login.php");
+  }
+  $statement = $pdo->prepare("SELECT * FROM posts WHERE id = :id");
+  $statement->bindParam(":id", $_GET['id']);
+  if($statement->execute()) {
+      $post = $statement->fetch(PDO::FETCH_OBJ);
+  }
+
+  if($_POST) {
+    $blogId = $_GET['id'];
+    $comment = $_POST['comment'];
+    $statement = $pdo->prepare("INSERT INTO comments(content,author_id,post_id) VALUES (:content,:author_id,:post_id)");
+    $statement->bindParam(":content", $comment);
+    $statement->bindParam(":author_id", $_SESSION['user_id']);
+    $statement->bindParam(":post_id", $blogId);
+    if($statement->execute()) {
+      header("location:detail.php?id=".$blogId);
+    }
+  }
+
+  $blogId = $_GET['id'];
+  $stmt = $pdo->prepare("SELECT * FROM comments WHERE post_id =  $blogId");
+  $stmt->execute();
+  $cmt = $stmt->fetch(PDO::FETCH_OBJ);
+
+  $authorId = $cmt->author_id;
+  $stmt = $pdo->prepare("SELECT * FROM users WHERE id =  $authorId");
+  $stmt->execute();
+  $author = $stmt->fetch(PDO::FETCH_OBJ);
+
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -17,7 +53,7 @@
 </head>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
-  <div class="">
+  <div class="content-wrapper ml-0">
 
     <!-- Main content -->
     <section class="content">
@@ -27,46 +63,27 @@
             <div class="card card-widget">
               <div class="card-header">
                 <div class="card-title float-none text-center">
-                    <h4 class="">Blog Title</h4>
+                    <h4 class=""><?php echo $post->title; ?></h4>
                 </div>
               </div>
               <!-- /.card-header -->
               <div class="card-body">
-                <img class="img-fluid pad w-100" src="dist/img/photo2.png" alt="Photo">
+                <img class="img-fluid pad w-100" src="admin/images/<?php echo $post->image; ?>" alt="Photo">
 
-                <p>I took this photo this morning. What do you guys think?</p>
-                <button type="button" class="btn btn-default btn-sm"><i class="fas fa-share"></i> Share</button>
-                <button type="button" class="btn btn-default btn-sm"><i class="far fa-thumbs-up"></i> Like</button>
-                <span class="float-right text-muted">127 likes - 3 comments</span>
+                <p><?php echo $post->content; ?></p> <br>
+                <a href="index.php" class="btn btn-outline-danger mb-3">Back To Blogs</a>
+                <h3>Comments</h3> <hr>
+                
               </div>
               <!-- /.card-body -->
               <div class="card-footer card-comments">
                 <div class="card-comment">
-                  <!-- User image -->
-                  <img class="img-circle img-sm" src="dist/img/user3-128x128.jpg" alt="User Image">
-
-                  <div class="comment-text">
+                  <div class="comment-text ml-0">
                     <span class="username">
-                      Maria Gonzales
-                      <span class="text-muted float-right">8:03 PM Today</span>
+                      <?php echo $author->name; ?>
+                      <span class="text-muted float-right"><?php echo $cmt->created_at; ?></span>
                     </span><!-- /.username -->
-                    It is a long established fact that a reader will distracted
-                    by the readable content of a page when looking at its layout.
-                  </div>
-                  <!-- /.comment-text -->
-                </div>
-                <!-- /.card-comment -->
-                <div class="card-comment">
-                  <!-- User image -->
-                  <img class="img-circle img-sm" src="dist/img/user4-128x128.jpg" alt="User Image">
-
-                  <div class="comment-text">
-                    <span class="username">
-                      Luna Stark
-                      <span class="text-muted float-right">8:03 PM Today</span>
-                    </span><!-- /.username -->
-                    It is a long established fact that a reader will distracted
-                    by the readable content of a page when looking at its layout.
+                      <?php echo $cmt->content; ?>.
                   </div>
                   <!-- /.comment-text -->
                 </div>
@@ -74,11 +91,9 @@
               </div>
               <!-- /.card-footer -->
               <div class="card-footer">
-                <form action="#" method="post">
-                  <img class="img-fluid img-circle img-sm" src="dist/img/user4-128x128.jpg" alt="Alt Text">
-                  <!-- .img-push is used to add margin to elements next to floating images -->
+                <form action="" method="post">
                   <div class="img-push">
-                    <input type="text" class="form-control form-control-sm" placeholder="Press enter to post comment">
+                    <input type="text" name="comment" class="form-control form-control-sm" placeholder="Press enter to post comment">
                   </div>
                 </form>
               </div>
@@ -98,12 +113,13 @@
   </div>
   <!-- /.content-wrapper -->
 
-  <footer class="main-footer ml">
-    <div class="float-right d-none d-sm-block">
-      <b>Version</b> 3.0.5
+  <footer class="main-footer ml-0">
+    <!-- To the right -->
+    <div class="float-right d-none d-sm-inline">
+      <a href="logout.php" class="btn btn-info">Logout</a>
     </div>
-    <strong>Copyright &copy; 2014-2019 <a href="http://adminlte.io">AdminLTE.io</a>.</strong> All rights
-    reserved.
+    <!-- Default to the left -->
+    <strong>Copyright &copy; 2020-2021 <a href="">mthblogs</a>.</strong> All rights reserved.
   </footer>
 
   <!-- Control Sidebar -->

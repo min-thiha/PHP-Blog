@@ -10,7 +10,7 @@
   } else {
     $pageno = 1;
   }
-  $numOfrecs = 1;
+  $numOfrecs = 5;
   $offset = ($pageno - 1) * $numOfrecs;
   if(empty($_POST['search'])) {
     $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");

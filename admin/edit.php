@@ -28,16 +28,14 @@
         $statement = $pdo->prepare("UPDATE posts SET title='$title',content='$content',image='$image' WHERE id='$id'");
         $result = $statement->execute();
         if($result){
-          // echo "<script>alert('Successfully updated')</script>";
-          header("location:index.php");
+          echo "<script>alert('Successfully Updated');window.location.href='index.php';</script>";
         }
       }
     } else {
       $statement = $pdo->prepare("UPDATE posts SET title='$title',content='$content' WHERE id='$id'");
       $result = $statement->execute();
       if($result){
-        // echo "<script>alert('Successfully updated')</script>";
-        header("location:index.php");
+        echo "<script>alert('Successfully Updated');window.location.href='index.php';</script>";
       }
     }
   }
