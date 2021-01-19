@@ -25,12 +25,17 @@
   $blogId = $_GET['id'];
   $stmt = $pdo->prepare("SELECT * FROM comments WHERE post_id =  $blogId");
   $stmt->execute();
-  $cmt = $stmt->fetch(PDO::FETCH_OBJ);
+  $cmts = $stmt->fetchAll(PDO::FETCH_OBJ);
 
-  $authorId = $cmt->author_id;
-  $stmt = $pdo->prepare("SELECT * FROM users WHERE id =  $authorId");
-  $stmt->execute();
-  $author = $stmt->fetch(PDO::FETCH_OBJ);
+
+if($cmts){
+  foreach($cmts as $cmt){
+    $authorId = $cmt->author_id;
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE id =  $authorId");
+    $stmt->execute();
+    $authors = $stmt->fetchAll(PDO::FETCH_OBJ);
+  }
+}
 
 ?>
 
@@ -39,7 +44,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>AdminLTE 3 | Widgets</title>
+  <title>Blog | Detail </title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- Font Awesome -->
@@ -78,13 +83,19 @@
               <!-- /.card-body -->
               <div class="card-footer card-comments">
                 <div class="card-comment">
-                  <div class="comment-text ml-0">
-                    <span class="username">
-                      <?php echo $author->name; ?>
-                      <span class="text-muted float-right"><?php echo $cmt->created_at; ?></span>
-                    </span><!-- /.username -->
-                      <?php echo $cmt->content; ?>.
-                  </div>
+                  <?php if($cmts):?>
+                  <?php foreach($cmts as $cmt): ?>
+                    <div class="comment-text ml-0">
+                      <span class="username">
+                        <?php foreach($authors as $author): ?>
+                        <?php echo $author->name; ?>
+                        <?php endforeach; ?>
+                        <span class="text-muted float-right"><?php echo $cmt->created_at; ?></span>
+                      </span><!-- /.username -->
+                        <?php echo $cmt->content; ?>.
+                    </div>
+                  <?php endforeach; ?>
+                  <?php endif; ?>
                   <!-- /.comment-text -->
                 </div>
                 <!-- /.card-comment -->

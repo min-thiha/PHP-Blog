@@ -21,7 +21,8 @@
             $statement->bindParam(":password", $password);
             $result = $statement->execute();
             if($user){
-                echo "<script>alert('Successfully registe, Please login');window.location.href='login.php';</script>";
+                echo "<script>alert('successfully register, please login');window.location.href='login.php'</script>";
+                header("location:login.php");
             }
         }
     }

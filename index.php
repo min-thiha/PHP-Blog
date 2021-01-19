@@ -7,6 +7,32 @@
   $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
   $statement->execute();
   $results = $statement->fetchAll(PDO::FETCH_OBJ);
+
+  if(!empty($_GET['pageno'])) {
+    $pageno = $_GET['pageno'];
+  } else {
+    $pageno = 1;
+  }
+  $numOfrecs = 6;
+  $offset = ($pageno - 1) * $numOfrecs;
+  if(empty($_POST['search'])) {
+    $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
+    $statement->execute();
+    $posts = $statement->fetchAll(PDO::FETCH_OBJ);
+    $total_pages = ceil(count($posts) / $numOfrecs);
+    $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC LIMIT $offset,$numOfrecs");
+    $statement->execute();
+    $results = $statement->fetchAll(PDO::FETCH_OBJ);
+  } else {
+    $search = $_POST['search'];
+    $statement = $pdo->prepare("SELECT * FROM posts WHERE title='$search' ORDER BY id DESC");
+    $statement->execute();
+    $posts = $statement->fetchAll(PDO::FETCH_OBJ);
+    $total_pages = ceil(count($posts) / $numOfrecs);
+    $statement = $pdo->prepare("SELECT * FROM posts WHERE title='$search' ORDER BY id DESC LIMIT $offset,$numOfrecs");
+    $statement->execute();
+    $results = $statement->fetchAll(PDO::FETCH_OBJ);
+  }
 ?>
 
 <!DOCTYPE html>
@@ -62,6 +88,21 @@
           <?php endif; ?>  
 
     </div>
+    <div class="row float-right mr-5">
+      <nav aria-label="Page navigation example">
+        <ul class="pagination">
+          <li class="page-item"><a class="page-link" href="?pageno=1">First</a></li>
+          <li class="page-item <?php if($pageno <= 1) {echo "disabled";} ?>">
+            <a class="page-link" href="<?php if($pageno <= 1){echo '#';}else{echo "?pageno=".($pageno-1);} ?>">Previous</a>
+          </li>
+          <li class="page-item"><a class="page-link" href="#"><?php echo $pageno; ?></a></li>
+          <li class="page-item <?php if($pageno >= $total_pages){echo 'disabled';} ?>">
+            <a class="page-link" href="<?php if($pageno >= $total_pages){echo '#';}else{echo "?pageno=".($pageno+1);} ?>">Next</a>
+          </li>
+          <li class="page-item"><a class="page-link" href="?pageno=<?php echo $total_pages ?>">Last</a></li>
+        </ul>
+      </nav>
+    </div> <br> <br>
     <!-- /.content -->
 
     <a id="back-to-top" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Scroll to top">
