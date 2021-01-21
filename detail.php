@@ -11,15 +11,22 @@
   }
 
   if($_POST) {
-    $blogId = $_GET['id'];
-    $comment = $_POST['comment'];
-    $statement = $pdo->prepare("INSERT INTO comments(content,author_id,post_id) VALUES (:content,:author_id,:post_id)");
-    $statement->bindParam(":content", $comment);
-    $statement->bindParam(":author_id", $_SESSION['user_id']);
-    $statement->bindParam(":post_id", $blogId);
-    if($statement->execute()) {
-      header("location:detail.php?id=".$blogId);
+    if(empty($_POST['comment'])){
+      if(empty($_POST['title'])) {
+        $cmtError = 'Comment can not be null';
+      }
+    }else{
+      $blogId = $_GET['id'];
+      $comment = $_POST['comment'];
+      $statement = $pdo->prepare("INSERT INTO comments(content,author_id,post_id) VALUES (:content,:author_id,:post_id)");
+      $statement->bindParam(":content", $comment);
+      $statement->bindParam(":author_id", $_SESSION['user_id']);
+      $statement->bindParam(":post_id", $blogId);
+      if($statement->execute()) {
+        header("location:detail.php?id=".$blogId);
+      }
     }
+
   }
 
   $blogId = $_GET['id'];
@@ -92,7 +99,7 @@ if($cmts){
                         <?php endforeach; ?>
                         <span class="text-muted float-right"><?php echo $cmt->created_at; ?></span>
                       </span><!-- /.username -->
-                        <?php echo $cmt->content; ?>.
+                        <?php echo $cmt->content; ?>
                     </div>
                   <?php endforeach; ?>
                   <?php endif; ?>
@@ -104,6 +111,7 @@ if($cmts){
               <div class="card-footer">
                 <form action="" method="post">
                   <div class="img-push">
+                  <p class="text-danger"><?php echo empty($cmtError)? '' : '*'.$cmtError; ?></p>
                     <input type="text" name="comment" class="form-control form-control-sm" placeholder="Press enter to post comment">
                   </div>
                 </form>
