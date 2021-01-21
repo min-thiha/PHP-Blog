@@ -4,6 +4,7 @@
     header("location:login.php");
   }
   require_once "../config/config.php";
+  require_once "../config/common.php";
   $statement = $pdo->prepare("SELECT * FROM posts ORDER BY id DESC");
   if($statement->execute()){
     $posts = $statement->fetchAll(PDO::FETCH_OBJ);
@@ -60,6 +61,7 @@
             <div class="card">
                 <div class="card-body">
                     <form action="add.php" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="_token" value="<?php echo $_SESSION['_token']; ?>">
                         <div class="form-group">
                             <label for="">Title</label>
                             <p class="text-danger"><?php echo empty($titleError)? '' : '*'.$titleError; ?></p>

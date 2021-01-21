@@ -1,6 +1,7 @@
 <?php
     session_start();
     require_once "config/config.php";
+    require_once "config/common.php";
 
     if ($_POST) {
         $name = $_POST['name'];
@@ -60,6 +61,7 @@
       <p class="login-box-msg">Register New Account</p>
 
       <form action="register.php" method="post">
+      <input type="hidden" name="_token" value="<?php echo $_SESSION['_token']; ?>">
       <div class="input-group mb-3">
           <input type="text" name="name" class="form-control" placeholder="Name">
           <div class="input-group-append">
