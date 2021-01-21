@@ -5,7 +5,7 @@
     if ($_POST) {
         $name = $_POST['name'];
         $email = $_POST['email'];
-        $password = $_POST['password'];
+        $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
         $statement = $pdo->prepare("SELECT * FROM users WHERE email=:email");
         $statement->bindParam(":email", $email);
         $user = $statement->fetch(PDO::FETCH_OBJ);
